@@ -6,7 +6,8 @@
 //I dati dei libri romanzo e dei non romanzo devono essere salvati su due file diversi.
 
 
-//system: Vuoi inserire un libro? O dare in prestito un libro? Dammi i libri presi in prestito da una persona?
+//system: Vuoi inserire un libro? O dare in prestito un libro?
+//system: O dammi i libri presi in prestito da una persona.
 //user: Inserire
 //system: Inserisci titolo e autore
 //user: Titolo e autore
@@ -24,23 +25,14 @@
 
 using ItsUmbria2023.Library;
 using ItsUmbria2023.Library.Models;
-using System.Text.Json;
 
-//var booksManager = new BooksManager("novel");
-//var booksManager = new BooksManager("not-novel");
-//booksManager.GetBooks();
-//booksManager.Save(List<Book>);
+var booksManagerForNovel = new BooksManager("novel");
+var booksManagerForNotNovel = new BooksManager("not-novel");
+var booksManagerForHorror = new BooksManager("horror");
 
-var novelPath = @"C:\Users\AlessandroRapiti\source\repos\ItsUmbria2023\ItsUmbria2023\novels.json";
-var notNovelPath = @"C:\Users\AlessandroRapiti\source\repos\ItsUmbria2023\ItsUmbria2023\not-novels.json";
-var novelListAsJson = File.ReadAllText(novelPath);
-var notNovelListAsJson = File.ReadAllText(notNovelPath);
-var novelList = !string.IsNullOrWhiteSpace(novelListAsJson) ?
-    JsonSerializer.Deserialize<List<Book>>(novelListAsJson)
-    : new List<Book>(); //read file and parse json
-var notNovelList = !string.IsNullOrWhiteSpace(notNovelListAsJson) ?
-    JsonSerializer.Deserialize<List<Book>>(notNovelListAsJson)
-    : new List<Book>(); //read file and parse json
+var novelList = booksManagerForNovel.GetBooks();
+var notNovelList = booksManagerForNotNovel.GetBooks();
+var horrorList = booksManagerForHorror.GetBooks();
 
 Console.WriteLine("Vuoi inserire un nuovo libro (1)? O dare in prestito un libro (2)? O uscire (3)?");
 var response = Console.ReadLine();
@@ -63,15 +55,13 @@ while (response != "3")
         if (isNovel)
         {
             novelList.Add(book);
-            var json = JsonSerializer.Serialize(novelList);
-            File.WriteAllText(novelPath, json);
+            booksManagerForNovel.SaveBooks(novelList);
             Console.WriteLine($"Hai inserito {book.Title} di {book.Author}. Hai {novelList.Count} romanzi.");
         }
         else
         {
             notNovelList.Add(book);
-            var json = JsonSerializer.Serialize(notNovelList);
-            File.WriteAllText(notNovelPath, json);
+            booksManagerForNotNovel.SaveBooks(notNovelList);
             Console.WriteLine($"Hai inserito {book.Title} di {book.Author}. Hai {notNovelList.Count} non romanzi.");
         }
     }
@@ -105,13 +95,11 @@ while (response != "3")
             book.Owner = owner;
             if (book.IsNovel)
             {
-                var json = JsonSerializer.Serialize(novelList);
-                File.WriteAllText(novelPath, json);
+                booksManagerForNovel.SaveBooks(novelList);
             }
             else
             {
-                var json = JsonSerializer.Serialize(notNovelList);
-                File.WriteAllText(notNovelPath, json);
+                booksManagerForNotNovel.SaveBooks(notNovelList);
             }
             Console.WriteLine($"Hai dato in prestito {book.Title} di {book.Author} a {book.Owner}");
         }
